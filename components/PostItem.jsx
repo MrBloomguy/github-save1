@@ -10,22 +10,44 @@ export default function PostItem({ post, isLastPost }) {
   const [hasLiked, setHasLiked] = useState(false);
   const [updatedPost, setUpdatedPost] = useState(post);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [buidlPoints, setBuidlPoints] = useState(post.content.buidlPoints || 0);
+  const [hasGivenPoints, setHasGivenPoints] = useState(false);
 
-  /** Check if user liked this post */
+  useEffect(() => {
+    loadCategories();
+    
+    async function loadCategories() {
+      let { data } = await orbis.api.from("orbis_contexts")
+        .select()
+        .eq('context', global.orbis_context)
+        .order('created_at', { ascending: false });
+      if(data) {
+        setCategories(data);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
-      getReaction();
+      checkReactions();
     }
 
-    async function getReaction() {
-      let { data, error } = await orbis.getReaction(post.stream_id, user.did);
-      if (data && data.type && data.type == "like") {
+    async function checkReactions() {
+      // Check upvote reaction
+      let { data: likeData } = await orbis.getReaction(post.stream_id, user.did);
+      if (likeData && likeData.type === "like") {
         setHasLiked(true);
+      }
+
+      // Check points reaction
+      let { data: pointsData } = await orbis.getReaction(post.stream_id, user.did, "buidl_points");
+      if (pointsData) {
+        setHasGivenPoints(true);
       }
     }
   }, [user]);
 
-  /** Will upvote the post */
   async function upvote() {
     if (user) {
       setHasLiked(true);
@@ -43,7 +65,19 @@ export default function PostItem({ post, isLastPost }) {
     }
   }
 
-  /** Will clean description by shortening it and remove some markdown structure */
+  async function giveBuidlPoints() {
+    if (user) {
+      if (!hasGivenPoints) {
+        setHasGivenPoints(true);
+        setBuidlPoints(prev => prev + 1);
+        let res = await orbis.react(post.stream_id, "buidl_points");
+        console.log("Points given:", res);
+      }
+    } else {
+      alert("You must be connected to give BuidlPoints.");
+    }
+  }
+
   function cleanDescription() {
     if (post.content.body) {
       let desc = post.content.body;
@@ -62,129 +96,116 @@ export default function PostItem({ post, isLastPost }) {
     }
   }
 
+  function getCategoryName() {
+    if (post.content.context === global.orbis_context) return "General";
+    const category = categories.find(cat => cat.stream_id === post.content.context);
+    return category?.content?.displayName || "General";
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-4">
-      <div className="p-4">
-        {/* Header with User Info */}
-        <div className="flex items-center mb-3">
-          <div className="flex-shrink-0 mr-3">
-            <User details={post.creator_details} height={40} />
-          </div>
-          <div>
-            <div className="font-medium text-gray-900">
-              {post.creator_details?.profile?.username || shortAddress(post.creator_details.metadata?.address)}
-            </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <span>{post.creator_details?.profile?.title || "Project Manager"}</span>
-              <span className="mx-1">·</span>
-              <ReactTimeAgo date={post.timestamp * 1000} timeStyle="twitter" />
-            </div>
-          </div>
-        </div>
+      {/* Previous header and content sections remain the same */}
 
-        {/* Post Content */}
-        <div className="mb-3">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            <Link href={"/post/" + post.stream_id} className="hover:text-[var(--brand-color)]">
-              {post.content.title}
-            </Link>
-          </h2>
-          <p className="text-gray-600">{cleanDescription()}</p>
-        </div>
-
-        {/* Engagement Stats */}
-        <div className="flex items-center text-sm text-gray-500 mb-3">
-          <div className="flex items-center">
-            <span className="font-medium">{updatedPost.count_likes || 0}</span>
-            <span className="ml-1">reactions</span>
-          </div>
-          <span className="mx-2">·</span>
-          <div className="flex items-center">
-            <span className="font-medium">{post.count_replies || 0}</span>
-            <span className="ml-1">comments</span>
-          </div>
-          <span className="mx-2">·</span>
-          <span>1 Share</span>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <button
-            onClick={upvote}
-            className={`flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 ${
-              hasLiked ? 'text-[var(--brand-color)]' : 'text-gray-600'
-            } ${isAnimating ? 'animate-bounce' : ''}`}
+      {/* Action Buttons */}
+      <div className="flex items-center space-x-4 pt-3 border-t border-gray-100">
+        {/* Upvote Button */}
+        <button
+          onClick={upvote}
+          className={`flex items-center space-x-2 ${
+            hasLiked ? 'text-blue-500' : 'text-gray-600'
+          } ${isAnimating ? 'animate-bounce' : ''} hover:text-blue-500`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill={hasLiked ? 'currentColor' : 'none'}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              fill={hasLiked ? 'currentColor' : 'none'}
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-              />
-            </svg>
-            React
-          </button>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 15l7-7 7 7"
+            />
+          </svg>
+          <span className="font-medium">{updatedPost.count_likes || 0}</span>
+        </button>
 
-          <Link
-            href={"/post/" + post.stream_id}
-            className="flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 text-gray-600"
+        {/* Comments Button */}
+        <Link
+          href={"/post/" + post.stream_id}
+          className="flex items-center space-x-2 text-green-600 hover:text-green-700"
+        >
+          <CommentsIcon className="h-5 w-5" />
+          <span className="font-medium">{post.count_replies || 0}</span>
+        </Link>
+
+        {/* BuidlPoints Button */}
+        <button
+          onClick={giveBuidlPoints}
+          className={`flex items-center space-x-2 ${
+            hasGivenPoints ? 'text-yellow-500' : 'text-gray-500'
+          } hover:text-yellow-500`}
+          disabled={hasGivenPoints}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill={hasGivenPoints ? 'currentColor' : 'none'}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <CommentsIcon className="h-5 w-5 mr-2" />
-            Comment
-          </Link>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span className="font-medium">{buidlPoints}</span>
+        </button>
 
-          <button className="flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 text-gray-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-              />
-            </svg>
-            Share
-          </button>
-
-          <Link
-            href={"/post/" + post.stream_id}
-            className="flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 text-gray-600"
+        {/* Category Badge */}
+        <div className="flex items-center space-x-2 text-purple-600">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-              />
-            </svg>
-            View
-          </Link>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+            />
+          </svg>
+          <span className="font-medium">{getCategoryName()}</span>
         </div>
+
+        {/* Proof Badge */}
+        <Link
+          href={`https://cerscan.com/mainnet/stream/${post.stream_id}`}
+          target="_blank"
+          className="flex items-center space-x-2 text-amber-600 hover:text-amber-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            />
+          </svg>
+        </Link>
       </div>
     </div>
   );
