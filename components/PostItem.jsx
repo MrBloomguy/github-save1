@@ -25,11 +25,11 @@ export default function PostItem({ post, isLastPost }) {
     }
   }, [user]);
 
-  /** Will like / upvote the post */
-  async function like() {
+  /** Will upvote the post */
+  async function upvote() {
     if (user) {
       setHasLiked(true);
-      setIsAnimating(true); // Trigger animation
+      setIsAnimating(true);
       setUpdatedPost({
         ...updatedPost,
         count_likes: post.count_likes + 1,
@@ -37,7 +37,6 @@ export default function PostItem({ post, isLastPost }) {
       let res = await orbis.react(post.stream_id, "like");
       console.log("res:", res);
 
-      // Reset animation after 500ms
       setTimeout(() => setIsAnimating(false), 500);
     } else {
       alert("You must be connected to react to posts.");
@@ -64,106 +63,129 @@ export default function PostItem({ post, isLastPost }) {
   }
 
   return (
-    <>
-      <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200 hover:shadow-sm transition-shadow duration-200">
-        <div className="flex flex-row items-start space-x-3">
-          {/* User Avatar */}
-          <div className="flex-shrink-0">
-            <User details={post.creator_details} height={48} />
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-4">
+      <div className="p-4">
+        {/* Header with User Info */}
+        <div className="flex items-center mb-3">
+          <div className="flex-shrink-0 mr-3">
+            <User details={post.creator_details} height={40} />
           </div>
-
-          {/* Post Content */}
-          <div className="flex-1">
-            {/* User Info and Timestamp */}
-            <div className="flex items-center space-x-2">
-              <span className="font-semibold text-gray-900">
-                {post.creator_details?.profile?.username || shortAddress(post.creator_details.metadata?.address)}
-              </span>
-              <span className="text-sm text-gray-500">·</span>
-              <span className="text-sm text-gray-500">
-                <ReactTimeAgo date={post.timestamp * 1000} />
-              </span>
+          <div>
+            <div className="font-medium text-gray-900">
+              {post.creator_details?.profile?.username || shortAddress(post.creator_details.metadata?.address)}
             </div>
-
-            {/* Post Title */}
-            <h2 className="text-lg font-semibold text-gray-900 mt-1">
-              <Link href={"/post/" + post.stream_id} className="hover:underline">
-                {post.content.title}
-              </Link>
-            </h2>
-
-            {/* Post Description */}
-            <p className="text-sm text-gray-700 mt-1">{cleanDescription()}</p>
-
-            {/* Post Actions (Upvote, Comments, Proof Badge) */}
-            <div className="flex items-center mt-3 space-x-6 text-gray-500">
-              {/* Upvote Button */}
-              <button
-                onClick={like}
-                className={`flex items-center space-x-1 hover:text-blue-500 transition-colors duration-200 ${
-                  isAnimating ? 'animate-bounce' : ''
-                }`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 ${hasLiked ? 'text-blue-500' : 'text-gray-500'}`}
-                  fill={hasLiked ? 'currentColor' : 'none'}
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 15l7-7 7 7"
-                  />
-                </svg>
-                <span>{updatedPost.count_likes}</span>
-              </button>
-
-              {/* Comments Count */}
-              {post.count_replies && post.count_replies > 0 && (
-                <Link
-                  href={"/post/" + post.stream_id}
-                  className="flex items-center space-x-1 hover:text-blue-500 transition-colors duration-200"
-                >
-                  <CommentsIcon className="w-5 h-5" />
-                  <span>{post.count_replies}</span>
-                </Link>
-              )}
-
-              {/* Proof Badge */}
-              {post.stream_id && (
-                <a
-                  href={`https://cerscan.com/${post.stream_id}`} // Replace with your proof link
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-1 hover:text-blue-500 transition-colors duration-200"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Proof</span>
-                </a>
-              )}
+            <div className="flex items-center text-sm text-gray-500">
+              <span>{post.creator_details?.profile?.title || "Project Manager"}</span>
+              <span className="mx-1">·</span>
+              <ReactTimeAgo date={post.timestamp * 1000} timeStyle="twitter" />
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Add a divider after each post except the last one */}
-      {!isLastPost && <hr className="border-t border-gray-200" />}
-    </>
+        {/* Post Content */}
+        <div className="mb-3">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <Link href={"/post/" + post.stream_id} className="hover:text-[var(--brand-color)]">
+              {post.content.title}
+            </Link>
+          </h2>
+          <p className="text-gray-600">{cleanDescription()}</p>
+        </div>
+
+        {/* Engagement Stats */}
+        <div className="flex items-center text-sm text-gray-500 mb-3">
+          <div className="flex items-center">
+            <span className="font-medium">{updatedPost.count_likes || 0}</span>
+            <span className="ml-1">reactions</span>
+          </div>
+          <span className="mx-2">·</span>
+          <div className="flex items-center">
+            <span className="font-medium">{post.count_replies || 0}</span>
+            <span className="ml-1">comments</span>
+          </div>
+          <span className="mx-2">·</span>
+          <span>1 Share</span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <button
+            onClick={upvote}
+            className={`flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 ${
+              hasLiked ? 'text-[var(--brand-color)]' : 'text-gray-600'
+            } ${isAnimating ? 'animate-bounce' : ''}`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill={hasLiked ? 'currentColor' : 'none'}
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+              />
+            </svg>
+            React
+          </button>
+
+          <Link
+            href={"/post/" + post.stream_id}
+            className="flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 text-gray-600"
+          >
+            <CommentsIcon className="h-5 w-5 mr-2" />
+            Comment
+          </Link>
+
+          <button className="flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+              />
+            </svg>
+            Share
+          </button>
+
+          <Link
+            href={"/post/" + post.stream_id}
+            className="flex items-center px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-200 text-gray-600"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+            View
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
