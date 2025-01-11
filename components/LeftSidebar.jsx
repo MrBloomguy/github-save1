@@ -1,137 +1,111 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useOrbis, User } from "@orbisclub/components";
 
 export default function LeftSidebar() {
   const { user } = useOrbis();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const isActivePath = (path) => router.pathname === path;
+
+  const menuItems = [
+    {
+      name: 'Projects',
+      path: '/projects',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      )
+    },
+    {
+      name: 'Trade',
+      path: '/trade',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+        </svg>
+      )
+    },
+    {
+      name: 'AI Agents',
+      path: '/ai-agents',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    {
+      name: 'PGA',
+      path: '/pga',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+        </svg>
+      )
+    }
+  ];
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col h-full">
-        <div className="flex flex-col h-full">
-          {/* Menu Section */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 mb-4 px-4">Menu</h3>
-            <nav>
-              <Link href="/" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                All Posts
-              </Link>
-              <Link href="/favorites" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                Favorites
-              </Link>
-            </nav>
+    <div className="h-full p-4">
+      <nav className="space-y-8">
+        {/* Main Menu */}
+        <div>
+          <div className="px-3 mb-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Main Menu
+            </h3>
           </div>
-
-          {/* Inbox Section */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 mb-4 px-4">Inbox</h3>
-            <nav>
-              <Link href="/notifications" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                Notifications
+          <div className="space-y-1">
+            {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActivePath(item.path)
+                    ? 'bg-brand text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {item.icon}
+                <span className="ml-3">{item.name}</span>
               </Link>
-              <Link href="/messages" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-                Messages
-              </Link>
-            </nav>
-          </div>
-
-          {/* Categories Section */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 mb-4 px-4">Categories</h3>
-            <nav>
-              <Link href="/category/personal" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <div className="w-4 h-4 rounded bg-cyan-200 mr-3"></div>
-                Personal
-              </Link>
-              <Link href="/category/entertainment" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <div className="w-4 h-4 rounded bg-blue-200 mr-3"></div>
-                Entertainment
-              </Link>
-              <Link href="/category/shopping" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <div className="w-4 h-4 rounded bg-purple-200 mr-3"></div>
-                Shopping
-              </Link>
-            </nav>
-          </div>
-
-          {/* Settings Section */}
-          <div className="mt-auto">
-            <nav>
-              <Link href="/settings" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Settings
-              </Link>
-              <Link href="/help" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Help
-              </Link>
-            </nav>
-
-            {/* User Profile Section */}
-            {user && (
-              <div className="flex items-center mt-8 px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                <User details={user} height={32} />
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-700">{user?.details?.profile?.username || 'Anonymous'}</p>
-                  <p className="text-xs text-gray-500">{user?.details?.metadata?.email || ''}</p>
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         </div>
-      </aside>
 
-      {/* Mobile Menu Button - Only visible on mobile */}
-      <button 
-        className="md:hidden fixed bottom-4 right-4 bg-brand text-white p-3 rounded-full shadow-lg z-50"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+        {/* Create Button */}
+        <div className="px-3">
+          <Link
+            href="/create"
+            className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create New
+          </Link>
+        </div>
 
-      {/* Mobile Sidebar */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
-          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-            <div className="h-full overflow-y-auto">
-              {/* Mobile menu content - same as desktop but with close button */}
-              <div className="flex justify-end p-4">
-                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-gray-700">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              {/* Rest of the sidebar content */}
-              <div className="px-4">
-                {/* Copy the same content structure as desktop sidebar */}
-                {/* ... */}
+        {/* User Profile */}
+        {user && (
+          <div className="px-3 mt-auto">
+            <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+              <User details={user} height={32} />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.details?.profile?.username || 'Anonymous'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {user?.details?.metadata?.email || ''}
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </nav>
+    </div>
   );
 }
