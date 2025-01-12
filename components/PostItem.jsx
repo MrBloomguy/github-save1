@@ -27,12 +27,17 @@ export default function PostItem({ post, isLastPost }) {
         .select()
         .eq("context", global.orbis_context)
         .order("created_at", { ascending: false });
+  
+      console.log("Fetched Categories:", data);
+      console.log("Post Context:", post.content.context);
+  
       if (data) {
         setCategories(data);
       }
     }
     loadCategories();
   }, []);
+
 
   // Check if user has liked this post
   useEffect(() => {
@@ -91,14 +96,15 @@ export default function PostItem({ post, isLastPost }) {
             </span>
             <div>
               <button
-                className="px-2 py-1 text-sm text-gray-500 bg-blue-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400"
-              >
-                {post.content.context === global.orbis_context
-                  ? "General"
-                  : categories?.find(
-                      (cat) => cat.stream_id === post.content.context
-                    )?.content?.displayName || "General"}
-              </button>
+  className="px-2 py-1 text-sm text-gray-500 bg-blue-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400"
+>
+  {post.content.context === global.orbis_context
+    ? "General"
+    : categories?.find(
+        (cat) => cat.stream_id === post.content.context
+      )?.content?.displayName || "General"}
+</button>
+
             </div>
           </div>
         </div>
