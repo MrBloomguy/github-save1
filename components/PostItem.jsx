@@ -9,6 +9,7 @@ import UrlMetadata from "./UrlMetadata";
 import { marked } from "marked";
 import parse from "html-react-parser";
 import DonateModal from "./DonateModal";
+import { FaShare } from "react-icons/fa";
 
 export default function PostItem({ post, isLastPost }) {
   const { orbis, user } = useOrbis();
@@ -165,20 +166,36 @@ export default function PostItem({ post, isLastPost }) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button
-              onClick={handleDonate}
-              className="px-4 py-1.5 text-sm font-medium text-green-600 bg-green-50 rounded-full hover:bg-green-100"
-            >
-              Donate
-            </button>
+          <button
+  onClick={handleDonate}
+  className="flex items-center px-4 py-1.5 text-sm font-medium text-green-600 bg-green-50 rounded-full hover:bg-green-100"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-4 h-4 mr-2"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+    />
+  </svg>
+  Donate
+</button>
 
-            <button
-              onClick={sharePost}
-              disabled={sharing}
-              className="px-4 py-1.5 text-sm text-gray-500 bg-gray-50 rounded-full hover:bg-gray-100"
-            >
-              Share
-            </button>
+
+<button
+  onClick={sharePost}
+  disabled={sharing}
+  className="p-2 text-gray-500 bg-gray-50 rounded-full hover:bg-gray-80 flex justify-center items-center"
+  title="Share"
+>
+  <FaShare className="w-4 h-4" />
+</button>
           </div>
         </div>
       </div>
