@@ -17,11 +17,11 @@ export default function Create() {
       <Head>
         {/** Title */}
         <title key="title">what are you Building | Share a new post.</title>
-        <meta property="og:title" content="Share a new post | Orbis Forum" key="og_title" />
+        <meta property="og:title" content="Share what you are building." key="og_title" />
 
         {/** Description */}
-        <meta name="description" content="Discuss the future of Orbis and experience the power of Open Social on our Orbis Forum." key="description"></meta>
-        <meta property="og:description" content="Discuss the future of Orbis and experience the power of Open Social on our Orbis Forum." key="og_description"/>
+        <meta name="description" content="Discuss the future public goods." key="description"></meta>
+        <meta property="og:description" content="Discuss the future public goods." key="og_description"/>
         <link rel="icon" href="/favicon.png" />
       </Head>
       <div className="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip bg-main">
@@ -32,7 +32,7 @@ export default function Create() {
             <main className="grow overflow-hidden">
               {/*  Site header */}
               <Header />
-              <Hero title="Sharing a new post on our forum" description="You are about to share a new post in the forum. Make sure to read our rules before doing so." image />
+              <Hero title="Share what you are buiding" description="You are about to share a new post in the forum. Make sure to read our rules before doing so." image />
 
               {/* Page content */}
               <section>
