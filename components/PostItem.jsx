@@ -91,7 +91,7 @@ export default function PostItem({ post, isLastPost }) {
             </span>
             <div>
               <button
-                className="px-2 py-1 text-sm text-gray-500 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400"
+                className="px-2 py-1 text-sm text-gray-500 bg-blue-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400"
               >
                 {post.content.context === global.orbis_context
                   ? "General"
