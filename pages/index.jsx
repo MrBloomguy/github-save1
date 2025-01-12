@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import Header from '../components/Header';
-import Hero from '../components/Hero';
 import Sidebar from '../components/Sidebar';
 import LeftSidebar from '../components/LeftSidebar';
 import PostItem from '../components/PostItem';
@@ -86,7 +85,7 @@ function Home({ defaultPosts }) {
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 w-full md:ml-64 md:mr-80">
           <div className="max-w-3xl mx-auto px-4 py-6">
-            <Hero />
+           
             <section>
               {global.orbis_context ? (
                 <>

@@ -8,15 +8,46 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Upvote from "./Upvote";
 import UrlMetadata from "./UrlMetadata";
 import ProofBadge from "./ProofBadge";
+import DOMPurify from 'dompurify';
+import parse from "html-react-parser";
 
 /** For Markdown support */
 import { marked } from 'marked';
-import parse from 'html-react-parser';
+
+
+
 
 export default function ArticleContent({post}) {
   const { orbis, user } = useOrbis();
   const [hasLiked, setHasLiked] = useState(false);
   const [updatedPost, setUpdatedPost] = useState(post);
+
+    // Sanitize the HTML content
+    const sanitizedContent = DOMPurify.sanitize(post.content.body);
+  
+    // Parse the sanitized HTML with custom replacements
+    const parsedContent = parse(sanitizedContent, {
+      replace: (domNode) => {
+        // Handle specific tag replacements
+        if (domNode.name === "iframe") {
+          return (
+            <div className="iframe-wrapper">
+              <iframe
+                src={domNode.attribs.src}
+                width={domNode.attribs.width}
+                height={domNode.attribs.height}
+                title={domNode.attribs.title}
+                allow={domNode.attribs.allow}
+                frameBorder={domNode.attribs.frameBorder}
+                allowFullScreen
+              ></iframe>
+            </div>
+          );
+        }
+      },
+    });
+  
+  
 
   /** Check if user liked this post */
   useEffect(() => {
@@ -70,6 +101,15 @@ export default function ArticleContent({post}) {
 
   return(
     <>
+
+    <div className="article-container">
+      {/* Render the post title */}
+      <h1 className="article-title">{post.content.title}</h1>
+
+      {/* Render the parsed content */}
+      <div className="article-body">{parsedContent}</div>
+    </div>
+
       <article className="w-full mb-8 pr-6">
         {/* Post header */}
         <header>
